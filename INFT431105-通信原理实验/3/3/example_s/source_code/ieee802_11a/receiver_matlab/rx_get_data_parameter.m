@@ -1,0 +1,37 @@
+function sim_options=rx_get_data_parameter(data_rate,data_length)
+switch data_rate
+    case{6}
+        sim_options.rate=6;
+        sim_options.ConvCodeRate='R1/2';
+        sim_options.Modulation='BPSK';
+    case{9}
+        sim_options.rate=9;
+        sim_options.ConvCodeRate='R3/4';
+        sim_options.Modulation='BPSK';
+    case{12}
+        sim_options.rate=12;
+        sim_options.ConvCodeRate='R1/2';
+        sim_options.Modulation='QPSK';
+    case{18}
+        sim_options.rate=18;
+        sim_options.ConvCodeRate='R3/4';
+        sim_options.Modulation='QPSK';
+    case{24}
+        sim_options.rate=24;
+        sim_options.ConvCodeRate='R1/2';
+        sim_options.Modulation='16QAM';
+    case{36}
+        sim_options.rate=36;
+        sim_options.ConvCodeRate='R3/4';
+        sim_options.Modulation='16QAM';
+    case{48}
+        sim_options.rate=48;
+        sim_options.ConvCodeRate='R2/3';
+        sim_options.Modulation='64QAM';
+    case{54}
+        sim_options.rate=54;
+        sim_options.ConvCodeRate='R3/4';
+        sim_options.Modulation='64QAM';
+end
+sim_options.PacketLength=data_length;
+end
