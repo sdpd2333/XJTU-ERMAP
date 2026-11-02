@@ -8,28 +8,41 @@ EsN0 = 0:2:20;%信噪比，总发射功率比每根接收天线的噪声方差
 P=1;     %总发射功率为1
 M = 4;   %QAM调制
 
+rng_state = rng; % 保存仿真开始前的随机数状态
+ber1 = zeros(size(EsN0));
+ber2 = zeros(size(EsN0));
+ber3 = zeros(size(EsN0));
+ber21 = zeros(size(EsN0));
+ber22 = zeros(size(EsN0));
+ber31 = zeros(size(EsN0));
+ber32 = zeros(size(EsN0));
+ber23 = zeros(size(EsN0));
+ber24 = zeros(size(EsN0));
+ber33 = zeros(size(EsN0));
+ber34 = zeros(size(EsN0));
+
 for index=1:length(EsN0)
     x = randi([0,(M-1)],Nt,datasize); %信源数据
     s = qammod(x,M,'UnitAveragePower', true); %QAM调制,Gray映射，功率归一化
-    s1 = [];
-    s2 = [];
-    s3 = [];
+    s1 = zeros(Nt, datasize);
+    s2 = zeros(Nt, datasize);
+    s3 = zeros(Nt, datasize);
     for index1 = 1:datasize
         h = randn(Nr,Nt)+j*randn(Nr,Nt); %Rayleigh衰落信道
         h = h./sqrt(2); %信道系数归一化
         sigma1 = sqrt(P/(10.^(EsN0(index)/10))/2); %每根接收天线的高斯白噪声标准差
         n = sigma1*(randn(Nr,1)+j*randn(Nr,1)); %每根接收天线的高斯白噪声
-        
+
         y =h*sqrt(P/Nt)*s(:,index1)+n; %信号通过信道,乘以sqrt(P/Nt)是为了保持每根天线发射功率为P/Nt
         [q1,r1] = qr(h); %信道QR分解
         r = r1(1:Nt,:); %矩阵R
         q = q1(:,1:Nt); %矩阵Q
         y =q'*y; %用Q矩阵对接收信号矢量进行处理
-       
-        %检测算法1：线性ZF检测，无串行干扰消除       
-        y1 = inv(r)*y/sqrt(P/Nt); 
-        s1 = [s1,qamdemod(y1,M,'UnitAveragePower', true)];%s1为采用线性ZF检测的解调信号
-        
+
+        %检测算法1：线性ZF检测，无串行干扰消除
+        y1 = (r \ y)/sqrt(P/Nt);
+        s1(:,index1) = qamdemod(y1,M,'UnitAveragePower', true);%s1为采用线性ZF检测的解调信号
+
         %检测算法2和3：基于ZF的串行干扰抵消检测,非理想和理想干扰消除
         y(Nt) = y(Nt)./(r(Nt,Nt))/sqrt(P/Nt); %检测第Nt层,QAM星座发送端对星座符号进行了功率缩放，接收端解映射前需对缩放进行逆处理
         y1(Nt) = qamdemod(y(Nt),M,'UnitAveragePower', true); %解调第Nt层
@@ -48,26 +61,26 @@ for index=1:length(EsN0)
             y(jj) = qammod(y1(jj),M,'UnitAveragePower', true); %非理想，第jj层解调结果重新进行调制
             y2(jj) = qammod(y3(jj),M,'UnitAveragePower', true);%理想，第jj层解调结果重新进行调制，理想抵消时暂未使用
         end
-        s2 = [s2,y1];
-        s3 = [s3,y3];
+        s2(:,index1) = y1;
+        s3(:,index1) = y3;
     end
-    
+
     [temp,ber1(index)] = biterr(x,s1,log2(M)); %无干扰消除时的系统误码
     [temp,ber2(index)] = biterr(x,s2,log2(M)); %非理想干扰消除时的系统误码
     [temp,ber3(index)] = biterr(x,s3,log2(M)); %理想干扰消除时的系统误码
-    
+
     [temp,ber21(index)] = biterr(x(1,:),s2(1,:),log2(M)); %非理想干扰消除时第1层的系统误码
     [temp,ber22(index)] = biterr(x(2,:),s2(2,:),log2(M)); %非理想干扰消除时第2层的系统误码
     [temp,ber23(index)] = biterr(x(3,:),s2(3,:),log2(M)); %非理想干扰消除时第 3 层的系统误码
     [temp,ber24(index)] = biterr(x(4,:),s2(4,:),log2(M)); %非理想干扰消除时第 4 层的系统误码
-    
+
     [temp,ber31(index)] = biterr(x(1,:),s3(1,:),log2(M)); %理想干扰消除时第1层的系统误码
     [temp,ber32(index)] = biterr(x(2,:),s3(2,:),log2(M)); %理想干扰消除时第2层的系统误码
     [temp,ber33(index)] = biterr(x(3,:),s3(3,:),log2(M)); %理想干扰消除时第 3 层的系统误码
     [temp,ber34(index)] = biterr(x(4,:),s3(4,:),log2(M)); %理想干扰消除时第 4 层的系统误码
-    
+
 end
- 
+
 semilogy(EsN0,ber1,'-ko',EsN0,ber2,'-r*',EsN0,ber3,'-gv')
 title('V-BLAST各种检测算法的性能对比')
 legend('无干扰消除，线性ZF','非理想干扰消除', '理想干扰消除')
@@ -88,4 +101,16 @@ legend('第1层','第2层','第3层','第4层')
 xlabel('信噪比Es/N0')
 ylabel('误比特率（BER）')
  grid on
-save('data_VBLAST_QPSK_2T2R.mat','EsN0','ber1','ber2','ber3','ber21','ber22','ber31','ber32');
+% 按实际配置命名，保留历史数据文件；相同配置重跑会覆盖 results 中的结果。
+if M == 4
+    modulation = 'QPSK';
+else
+    modulation = sprintf('%dQAM', M);
+end
+result_dir = fullfile(fileparts(mfilename('fullpath')), 'results');
+if ~exist(result_dir, 'dir')
+    mkdir(result_dir);
+end
+result_file = fullfile(result_dir, sprintf('data_VBLAST_%s_%dT%dR.mat', modulation, Nt, Nr));
+save(result_file, 'EsN0', 'M', 'Nt', 'Nr', 'datasize', 'P', 'rng_state', ...
+    'ber1', 'ber2', 'ber3', 'ber21', 'ber22', 'ber31', 'ber32', 'ber23', 'ber24', 'ber33', 'ber34');

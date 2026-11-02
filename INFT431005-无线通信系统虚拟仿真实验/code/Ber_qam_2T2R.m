@@ -1,20 +1,26 @@
-%2·¢2ÊÕ£¬QPSK,8QAM,16QAMÎóÂëÂÊÇúÏß
-load data_singleRX_QPSK.mat
-ber_qpsk=ber1;
-load data_singleRX_8QAM.mat
-ber_8qam=ber2;
-load data_singleRX_16QAM.mat
-ber_16qam=ber3;
-load data_doubleRX_QPSK.mat
-ber_qpsk2=ber1;
-load data_doubleRX_8QAM.mat
-ber_8qam2=ber1;
-load data_doubleRX_16QAM.mat
-ber_16qam2=ber1;
-semilogy(EsN0,ber_qpsk,'-ro',EsN0,ber_8qam,'-b*',EsN0,ber_16qam,'-k+',EsN0,ber_qpsk2,'--ro',EsN0,ber_8qam2,'--b*',EsN0,ber_16qam2,'--k+')
-%axis([0 15 10^-4 1]) 
-grid on
-legend('QPSK2T1R','8QAM2T1R','16QAM2T1R','QPSK2T2R','8QAM2T2R','16QAM2T2R')
-xlabel('ĞÅÔë±ÈEs/N0')
-ylabel('Îó±ÈÌØÂÊ£¨BER£©')
-title('Alamouti·½°¸ÔÚ×¼¾²Ì¬ÈğÀûË¥ÂäĞÅµÀÏÂµÄÎóÂëÂÊĞÔÄÜ,2·¢2ÊÕ')
+% æ¯”è¾ƒ 2T1R / 2T2R çš„ QPSKã€8QAMã€16QAM è¯¯ç ç‡ã€‚
+% å…ˆè¿è¡Œ tiaozhi_diffrence.m å’Œ doubleRX.m å¯é‡æ–°ç”Ÿæˆæ‰€éœ€æ•°æ®ã€‚
+data_dir = fileparts(mfilename('fullpath'));
+filenames = {'data_singleRX_QPSK.mat', 'data_singleRX_8QAM.mat', ...
+    'data_singleRX_16QAM.mat', 'data_doubleRX_QPSK.mat', ...
+    'data_doubleRX_8QAM.mat', 'data_doubleRX_16QAM.mat'};
+preferred_fields = {'ber1', 'ber2', 'ber3', 'ber1', 'ber1', 'ber1'};
+curves = cell(1, numel(filenames));
+for index = 1:numel(filenames)
+    [snr_axis, curves{index}] = load_ber_curve( ...
+        fullfile(data_dir, filenames{index}), preferred_fields{index});
+    if index == 1
+        EsN0 = snr_axis;
+    elseif ~isequal(EsN0, snr_axis)
+        error('ERMAP:SNRMismatch', 'SNR grid differs in %s.', filenames{index});
+    end
+end
+figure;
+semilogy(EsN0, curves{1}, '-ro', EsN0, curves{2}, '-b*', ...
+    EsN0, curves{3}, '-k+', EsN0, curves{4}, '--ro', ...
+    EsN0, curves{5}, '--b*', EsN0, curves{6}, '--k+');
+grid on;
+legend('QPSK2T1R', '8QAM2T1R', '16QAM2T1R', 'QPSK2T2R', '8QAM2T2R', '16QAM2T2R');
+xlabel('ä¿¡å™ªæ¯” Es/N0');
+ylabel('è¯¯æ¯”ç‰¹ç‡ï¼ˆBERï¼‰');
+title('Alamouti æ–¹æ¡ˆåœ¨å‡†é™æ€ç‘åˆ©è¡°è½ä¿¡é“ä¸‹çš„è¯¯ç ç‡æ€§èƒ½');

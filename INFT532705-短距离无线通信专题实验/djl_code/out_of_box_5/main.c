@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "simplelink.h"
+#include "../network_config.h"
 #include "netcfg.h"
 #include "hw_ints.h"
 #include "hw_types.h"
@@ -35,8 +36,8 @@
 #define PORT_NUM                5001
 #define BUF_SIZE                1400
 
-#define MY_SSID_NAME            /*"TP-LINK_76E3"*/"Redmi_217D"
-#define MY_SECURITY_KEY         /*"xjtu624624"*/"13927779896"
+#define MY_SSID_NAME ERMAP_STA_SSID
+#define MY_SECURITY_KEY ERMAP_STA_PASSWORD
 #define MY_SECURITY_TYPE        SL_SEC_TYPE_WPA
 
 // ×´Ì¬Î»ÑÚÂëºÍ²Ù×÷ºê

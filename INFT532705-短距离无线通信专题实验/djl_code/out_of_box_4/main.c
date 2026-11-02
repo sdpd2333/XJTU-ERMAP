@@ -4,6 +4,7 @@
 
 // Simplelink includes
 #include "simplelink.h"
+#include "../network_config.h"
 #include "netcfg.h"
 
 // Driverlib includes
@@ -44,10 +45,10 @@
 #define SL_STOP_TIMEOUT                  200
 
 // 自定义网络配置参数
-#define AP_SSID_NAME                     "YihaoWang"
-#define AP_PASSWORD                      "2224411546"
-#define STA_SSID_NAME                    /*"TP-LINK_76E3"*/"Redmi_217D"
-#define STA_PASSWORD                     /*"xjtu624624"*/"13927779896"
+#define AP_SSID_NAME ERMAP_AP_SSID
+#define AP_PASSWORD ERMAP_AP_PASSWORD
+#define STA_SSID_NAME ERMAP_STA_SSID
+#define STA_PASSWORD ERMAP_STA_PASSWORD
 
 typedef enum
 {
