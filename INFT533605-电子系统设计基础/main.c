@@ -2,10 +2,13 @@
 #include <reg51.h>//51单片机头文件
 #include <absacc.h>//51单片机寄存器头文件
 
+#define DISPLAY_DIGITS 8
+#define KEY_NONE 16
+
 
 //定义变量
 //定义了一个8位的数据存储器，用于存储按键的值
-unsigned char code SEG[8] = 
+unsigned char code SEG[DISPLAY_DIGITS] =
 {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
 
 //定义了一个16个元素的数组，用于存储16个字符的段码
@@ -14,7 +17,7 @@ unsigned char code duan[16] =
 0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};
 
 //定义了一个16个元素的数组，用于存储16个字符的键码
-unsigned char code change[16] = 
+unsigned char code change[16] =
 {0x11,0x21,0x41,0x81,0x12,0x22,0x42,0x82,
 0x14,0x24,0x44,0x84,0x18,0x28,0x48,0x88
 };
@@ -34,6 +37,11 @@ void delay(int count)
 //显示函数，参数：duan_num，段码的编号，wei_num，位码的编号，返回值：无，功能：显示段码和位码
 void show(unsigned char duan_num, unsigned char wei_num)
 {
+	if(duan_num >= KEY_NONE)
+	{
+		XBYTE[0x9000] = 0x00;
+		return;
+	}
 	//定义变量
 	XBYTE[0x8000] = wei_num;
 
@@ -56,14 +64,14 @@ int	getkeycode(void)
 	unsigned char scancode = 0x01;
 	unsigned char keycode;
 	int	i;
-	
+
 	//获取按键的键码
 	XBYTE[0x8000] = 0xff;
 
 	//获取按键的列码
 	col = XBYTE[0x8000]&0x0f;
 
-	if(col == 0x00) return 16;
+	if(col == 0x00) return KEY_NONE;
 	else
 	{
 		while((scancode&0x0f) != 0)
@@ -84,49 +92,8 @@ int	getkeycode(void)
 			return i;
 		}
 	}
+	return KEY_NONE;
 }
-/*
-//主函数，流水灯
-void	main(void)
-{
-	//定义变量
-	int		j;
-	int		i;
-	unsigned char	num;
-	//显示函数
-	while(1)
-	{
-			for(j=0;j<8;j++)
-			{
-				num = getkeycode();
-				if(num != 16)
-					for(i=0;i<1200;i++)
-						show(num, SEG[j]);
-			}
-	}
-}
-*/
-/*
-//主函数，全部显示
-void	main(void)
-{
-	//定义变量
-	int		i;
-	int		j;
-	int		k = 0;
-	unsigned char	num;
-	//显示函数
-	while(1)
-	{
-		for(i=0;i<250;i++)
-		{
-			num = getkeycode();
-			for(j=0;j<1200;j++)
-				show(num, SEG[j]);
-		}
-	}
-}
-*/
 
 //主函数，流水灯显示学号
 void	main(void)
@@ -134,15 +101,15 @@ void	main(void)
 	//定义变量
 	int		i;
 	int		j;
-	int		k = 0;
+	unsigned char k = 0;
 	//显示函数
 	while(1)
 	{
 		for(i=0;i<250;i++)
 		{
-			for(j=0;j<8;j++)
-				show(stu[j], SEG[(j+k)%10]);
+			for(j=0;j<DISPLAY_DIGITS;j++)
+				show(stu[j], SEG[(j+k)%DISPLAY_DIGITS]);
 		}
-		k++;
+		k = (k + 1) % DISPLAY_DIGITS;
 	}
 }

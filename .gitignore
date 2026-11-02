@@ -1,0 +1,29 @@
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# Office lock files
+~$*
+
+# MATLAB / Simulink generated caches (keep .mat data and .slx models)
+slprj/
+*.slxc
+*.asv
+
+# Code Composer Studio generated build directories
+/INFT532705-*/djl_code/*/Debug/
+/INFT532705-*/djl_code/*/Release/
+/INFT532705-*/djl_code/network_config.h
+
+# Local tools, reports and generated assets
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+/outputs/
+/INFT430605-*/document/samples/
+/INFT430605-*/lab1/processed_audio_*.wav
+/INFT431005-*/code/results/
